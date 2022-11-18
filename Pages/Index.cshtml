@@ -1,0 +1,139 @@
+﻿@page
+
+@model IndexModel
+@{
+    ViewData["Title"] = "Blogg";
+}
+
+<div id="new-post" class="card mt-2 mb-5 shadow">
+    <div id="form-post" class="card-body ">
+        <h5 class="card-title">Nytt inlägg</h5>
+        <div class="mt-4">
+            <input id="new-post-title" type="text" class="form-control" maxlength="160" placeholder="Rubrik" />
+        </div>
+        <div class="flex mt-2 ms-2">
+            <input type="radio" id="radio-btn-edit" name="options-editing" class="btn-check border" autocomplete="off" checked />
+            <label class="btn btn-outline-success" for="radio-btn-edit">Redigeringsläge</label>
+            <input type="radio" id="radio-btn-show" name="options-editing" class="btn-check  border" autocomplete="off" />
+            <label class="btn btn-outline-success" for="radio-btn-show">Visningsläge</label>
+        </div>
+        <div class="position-relative pb-5">
+            <div id="new-post-text" contenteditable="true" class="mt-1 form-control" style="min-height:6rem;"></div>
+            <form id="new-post-form" method="post">
+                <input id="h-title" asp-for=NewPost.Title type="text" class="d-none" />
+                <input id="h-text" asp-for=NewPost.HtmlText type="text" class="d-none" />
+                <input type="submit" value="Lägg upp" class="mt-3 position-absolute end-0 btn bg-primary text-light" />
+            </form>
+        </div>
+    </div>
+</div>
+<div class="card mb-5 bg-light">
+    <div class="card-body ">
+        <h2 class="card-title text-center">Blogginlägg</h2>
+    </div>
+</div>
+@foreach (var blog in Model.Blogs)
+{
+    <div class="card mb-5 p-2 shadow">
+        <div class="card-body">
+            <h4 class="card-title">@blog.Title</h4>
+            <div class="card-subtitle text-muted mt-1 mb-3">
+                <b>@blog.DateTimeCreated.ToShortDateString()</b> | @blog.DateTimeCreated.ToShortTimeString()
+            </div>
+            <p class="card-text mb-3">
+                @{
+                    //Sanatize output.
+                    string[] allowedTags = { "b", "i", "/b", "/i" };
+                    string processedText = blog.HtmlText;
+                    string[] fSs = processedText.Split('<');
+                    string[] sSs;
+                    foreach (string fS in fSs)
+                    {
+                        if (fS.Contains(">"))
+                        {
+                            sSs = fS.Split(">");
+                            for (int i = 0; i < sSs.Count(); i++)
+                            {
+                                string sS = sSs[i];
+                                //The one with index 0 is the one with between '<' and '>' 
+                                if (i == 0)
+                                {
+                                    if (allowedTags.Contains(sS))
+                                    {
+                                        @Html.Raw("<" + sS + ">")
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayName($"<{sS}>")
+                                    }
+                                }
+                                else
+                                {
+                                    @Html.DisplayName(sS)
+                                }
+                            }
+                        }
+                        else
+                        {
+                            @Html.DisplayName(fS)
+                        }
+                    }
+                }
+            </p>
+            <span class="text-muted">Skriven av </span>
+            <h6><i>@blog.AuthorName</i></h6>
+        </div>
+    </div>
+}
+
+@section scripts {
+    <script>
+        let chkEdit = document.getElementById('radio-btn-edit')
+        let chkShow = document.getElementById('radio-btn-show')
+        let vTitle = document.getElementById("new-post-title")
+        let hTitle = document.getElementById("h-title")
+        let vText = document.getElementById("new-post-text")
+        let hText = document.getElementById("h-text")
+
+        document.getElementById("new-post-form").addEventListener('submit', e => {
+            hTitle.value = vTitle.value;
+            if (chkEdit.hasAttribute('checked')) {
+                hText.value = vText.innerText;
+            } else {
+                hText.value = vText.innerHTML;
+            }
+            if (hTitle.value === "" || hText.value === "") {
+                e.preventDefault();
+                alert("Rubrik eller text saknas!")
+            }
+        })
+
+
+        chkEdit.addEventListener('click', e => {
+            if (!chkEdit.hasAttribute('checked')) {
+                chkShow.removeAttribute('checked')
+                chkEdit.setAttribute('checked', '')
+
+                editMode()
+            }
+        })
+        chkShow.addEventListener('click', e => {
+            if (!chkShow.hasAttribute('checked')) {
+                chkEdit.removeAttribute('checked')
+                chkShow.setAttribute('checked', '')
+
+                showMode()
+            }
+        })
+        function showMode() {
+            var txt = document.getElementById("new-post-text").innerText
+            document.getElementById("new-post-text").innerHTML = txt
+            document.getElementById("new-post-text").setAttribute('contenteditable', 'false')
+        }
+        function editMode() {
+            var innerHtml = document.getElementById("new-post-text").innerHTML
+            document.getElementById("new-post-text").innerText = innerHtml
+            document.getElementById("new-post-text").setAttribute('contenteditable', 'true')
+        }
+    </script>
+}
