@@ -59,9 +59,9 @@
                                 //The one with index 0 is the one between '<' and '>' 
                                 if (i == 0)
                                 {
-                                    if (allowedTags.Contains(sS))
+                                    if (allowedTags.Contains(sS.ToLower()))
                                     {
-                                        @Html.Raw("<" + sS + ">")
+                                        @Html.Raw("<" + sS.ToLower() + ">")
                                     }
                                     else
                                     {
