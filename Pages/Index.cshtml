@@ -38,6 +38,7 @@
         <div class="card-body">
             <h4 class="card-title">@blog.Title</h4>
             <div class="card-subtitle text-muted mt-1 mb-3">
+@*                TODO: This sends UTC. Change to javascript to display localtime*@
                 <b>@blog.DateTimeCreated.ToShortDateString()</b> | @blog.DateTimeCreated.ToShortTimeString()
             </div>
             <p class="card-text mb-3">
@@ -55,7 +56,7 @@
                             for (int i = 0; i < sSs.Count(); i++)
                             {
                                 string sS = sSs[i];
-                                //The one with index 0 is the one with between '<' and '>' 
+                                //The one with index 0 is the one between '<' and '>' 
                                 if (i == 0)
                                 {
                                     if (allowedTags.Contains(sS))
